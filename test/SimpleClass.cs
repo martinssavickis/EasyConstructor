@@ -146,7 +146,7 @@ namespace test
                 Foo = 44,
                 Bar = "Question",
             };
-            var expected = new TestClass(parameters.Foo, parameters.Bar, defaults.Baz);
+            var expected = new TestClass(1, parameters.Bar, defaults.Baz);
 
             initializer.AddDefaultParameters<TestClass>(defaults);
             var actual = initializer.Create<TestClass>(parameters);
