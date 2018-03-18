@@ -8,11 +8,18 @@ namespace EasyConstructor
     public class Initializer
     {
         private Dictionary<Type, Dictionary<string, object>> defaultsLookup = new Dictionary<Type, Dictionary<string, object>>();
+        private Dictionary<Type, ConstructorInfo> constructorLookup = new Dictionary<Type, ConstructorInfo>();
 
         public void AddDefaultParameters<T>(object parameters) where T : class
         {
             var type = typeof(T);
             AddDefaultParameters(type, parameters);
+        }
+
+        public void UseConstructor<T>(Func<ConstructorInfo[], ConstructorInfo> select)
+        {
+            var type = typeof(T);
+            constructorLookup[type] = select(type.GetConstructors());
         }
 
         public T Create<T>(object parameters = null) where T : class
@@ -97,9 +104,13 @@ namespace EasyConstructor
             return null;
         }
 
-        //add config to pass in constructor selector delegate
         private ConstructorInfo GetApplicableConstructor(Type type, object parameters)
         {
+            if (constructorLookup.ContainsKey(type))
+            {
+                return constructorLookup[type];
+            }
+
             //TODO check if class with no declared constructors will have default in list
             ConstructorInfo bestConstructor = type.GetConstructors().First();
             if (parameters != null)
