@@ -45,7 +45,7 @@ namespace EasyConstructor
 
         private object CreateWithParameters(Type type, object parameters)
         {
-            var constructorParams = GetApplicableConstructor(type).GetParameters();
+            var constructorParams = GetApplicableConstructor(type, parameters).GetParameters();
 
             var resolvedParams = new List<object>(constructorParams.Length);
             foreach (var constructorParam in constructorParams)
@@ -97,13 +97,30 @@ namespace EasyConstructor
             return null;
         }
 
-        //TODO decide on sensible default
         //add config to pass in constructor selector delegate
-        private ConstructorInfo GetApplicableConstructor(Type type)
+        private ConstructorInfo GetApplicableConstructor(Type type, object parameters)
         {
-            var constructors = type.GetConstructors();
+            //TODO check if class with no declared constructors will have default in list
+            ConstructorInfo bestConstructor = type.GetConstructors().First();
+            if (parameters != null)
+            {
+                //naive implementation, seems sound tho
+                var props = parameters.GetType().GetProperties().Select(p =>(p.PropertyType, p.Name)).ToList();
+                int bestMatches = 0;
+                foreach (var constructor in type.GetConstructors())
+                {
+                    var constructorParams = constructor.GetParameters().Select(p =>(p.ParameterType, p.Name));
+                    var matched = constructorParams.Count(p => props.Contains(p));
 
-            return constructors.First();
+                    if (matched > bestMatches)
+                    {
+                        bestMatches = matched;
+                        bestConstructor = constructor;
+                    }
+                }
+            }
+
+            return bestConstructor;
         }
     }
 }
