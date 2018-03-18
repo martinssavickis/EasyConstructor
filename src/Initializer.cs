@@ -116,16 +116,18 @@ namespace EasyConstructor
             if (parameters != null)
             {
                 //naive implementation, seems sound tho
-                var props = parameters.GetType().GetProperties().Select(p =>(p.PropertyType, p.Name)).ToList();
+                var props = parameters.GetType().GetProperties().Select(p =>(p.PropertyType, p.Name.ToUpper())).ToList();
                 int bestMatches = 0;
+                int bestParamCount = int.MaxValue;
                 foreach (var constructor in type.GetConstructors())
                 {
-                    var constructorParams = constructor.GetParameters().Select(p =>(p.ParameterType, p.Name));
+                    var constructorParams = constructor.GetParameters().Select(p =>(p.ParameterType, p.Name.ToUpper()));
                     var matched = constructorParams.Count(p => props.Contains(p));
 
-                    if (matched > bestMatches)
+                    if (matched > bestMatches || (matched == bestMatches && constructorParams.Count() < bestParamCount))
                     {
                         bestMatches = matched;
+                        bestParamCount = constructorParams.Count();
                         bestConstructor = constructor;
                     }
                 }

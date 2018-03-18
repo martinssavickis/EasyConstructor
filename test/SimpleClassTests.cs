@@ -134,7 +134,7 @@ namespace test
         }
 
         [Fact]
-        public void Create_OverridesParameters_ReturnsExpectedValues()
+        public void Create_OverridesDefaultParameters_ReturnsExpectedValues()
         {
             var defaults = new
             {
