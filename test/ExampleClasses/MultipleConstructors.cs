@@ -2,7 +2,7 @@ using System;
 
 namespace test
 {
-    public class MultipleConstructors
+    public class MultipleConstructors : IMultipleConstructors
     {
         public int Foo { get; private set; }
 

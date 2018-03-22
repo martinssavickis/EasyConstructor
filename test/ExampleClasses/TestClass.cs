@@ -2,7 +2,7 @@ using System;
 
 namespace test
 {
-    public class TestClass
+    public class TestClass : ITestClass
     {
         public int Foo { get; private set; }
 

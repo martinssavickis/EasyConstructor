@@ -65,7 +65,7 @@ namespace test
             };
             var expected = new TestClass(defaults.Foo, defaults.Bar, defaults.Baz);
 
-            initializer.AddDefaultParameters<TestClass>(defaults);
+            initializer.AddDefaultValues<TestClass>(defaults);
             var actual = initializer.Create<TestClass>();
 
             actual.Should().BeEquivalentTo(expected);
@@ -81,7 +81,7 @@ namespace test
             };
             var expected = new TestClass(default(int), defaults.Bar, defaults.Baz);
 
-            initializer.AddDefaultParameters<TestClass>(defaults);
+            initializer.AddDefaultValues<TestClass>(defaults);
             var actual = initializer.Create<TestClass>();
 
             actual.Should().BeEquivalentTo(expected);
@@ -104,8 +104,8 @@ namespace test
             };
             var expected = new TestClass(defaultsOverride.Foo, defaultsOverride.Bar, defaultsOverride.Baz);
 
-            initializer.AddDefaultParameters<TestClass>(defaults);
-            initializer.AddDefaultParameters<TestClass>(defaultsOverride);
+            initializer.AddDefaultValues<TestClass>(defaults);
+            initializer.AddDefaultValues<TestClass>(defaultsOverride);
             var actual = initializer.Create<TestClass>();
 
             actual.Should().BeEquivalentTo(expected);
@@ -126,8 +126,8 @@ namespace test
             };
             var expected = new TestClass(defaultsOverride.Foo, defaultsOverride.Bar, defaults.Baz);
 
-            initializer.AddDefaultParameters<TestClass>(defaults);
-            initializer.AddDefaultParameters<TestClass>(defaultsOverride);
+            initializer.AddDefaultValues<TestClass>(defaults);
+            initializer.AddDefaultValues<TestClass>(defaultsOverride);
             var actual = initializer.Create<TestClass>();
 
             actual.Should().BeEquivalentTo(expected);
@@ -148,7 +148,7 @@ namespace test
             };
             var expected = new TestClass(parameters.Foo, parameters.Bar, defaults.Baz);
 
-            initializer.AddDefaultParameters<TestClass>(defaults);
+            initializer.AddDefaultValues<TestClass>(defaults);
             var actual = initializer.Create<TestClass>(parameters);
 
             actual.Should().BeEquivalentTo(expected);
