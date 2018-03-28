@@ -67,7 +67,6 @@ namespace EasyConstructor
             var resolvedParams = new List<object>(constructorParams.Length);
             foreach (var constructorParam in constructorParams)
             {
-
                 resolvedParams.Add(ResolveConstructorParameter(type, constructorParam, values));
             }
 
@@ -84,7 +83,6 @@ namespace EasyConstructor
                     return fromParameters;
                 }
             }
-
             return ResolveFromDefaults(type, parameterInfo);
         }
 
