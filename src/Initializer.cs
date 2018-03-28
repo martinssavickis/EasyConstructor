@@ -15,7 +15,7 @@ namespace EasyConstructor
             AddDefaultValues(type, values);
         }
 
-        public void RegisterInterface<TInterface, TConcrete>()
+        public void RegisterInterface<TInterface, TImplementation>()
         {
             var interfaceType = typeof(TInterface);
             if (!interfaceType.IsInterface)
@@ -23,7 +23,7 @@ namespace EasyConstructor
                 throw new TypeLoadException("must be interface");
             }
 
-            var concreteType = typeof(TConcrete);
+            var concreteType = typeof(TImplementation);
             if (concreteType.IsInterface)
             {
                 throw new TypeLoadException("must be concrete class");
@@ -76,7 +76,6 @@ namespace EasyConstructor
 
         private object ResolveConstructorParameter(Type type, ParameterInfo parameterInfo, object values)
         {
-            NamedType constructorParameter = new NamedType(parameterInfo.ParameterType, parameterInfo.Name);
             if (values != null)
             {
                 object fromParameters = ResolveFromValues(parameterInfo, values);
@@ -91,24 +90,25 @@ namespace EasyConstructor
 
         private Object ResolveFromValues(ParameterInfo parameterInfo, object values)
         {
-            NamedType constructorParameter = new NamedType(parameterInfo.ParameterType, parameterInfo.Name);
-            var paramList = values.GetType().GetProperties().Select(p =>(NamedType: new NamedType(p.PropertyType, p.Name), PropertyInfo : p));
-
             //check if there is a parameter in anonymous object we can use
-            var found = paramList.SingleOrDefault(p => p.NamedType.IsAssignableTo(constructorParameter));
-            if (found.NamedType != null)
+            var value = values.GetType().GetProperties().SingleOrDefault(p => p.IsUsableFor(parameterInfo));
+            if (value != null)
             {
-                Type typeToCreate = ResolveType(constructorParameter.ParamType, found.NamedType.ParamType);
-
-                //parameter is object that needs creating
-                if (found.NamedType.ParamType.Name.ToString().Contains("AnonymousType"))
+                Type typeToCreate = ResolveType(parameterInfo.ParameterType, value.PropertyType);
+                if (typeToCreate == null)
                 {
-                    return CreateWithValues(typeToCreate, found.PropertyInfo.GetValue(values));
+                    return null;
                 }
 
-                if (typeToCreate.IsAssignableFrom(found.NamedType.ParamType))
+                //parameter is object that needs creating
+                if (value.PropertyType.Name.ToString().Contains("AnonymousType"))
                 {
-                    return found.PropertyInfo.GetValue(values);
+                    return CreateWithValues(typeToCreate, value.GetValue(values));
+                }
+
+                if (typeToCreate.IsAssignableFrom(value.PropertyType))
+                {
+                    return value.GetValue(values);
                 }
             }
             return null;
@@ -143,9 +143,15 @@ namespace EasyConstructor
             }
 
             //if constructor param is interface we have registered, return registered
-            if (constructorType.IsInterface && context.InterfaceLookup.ContainsKey(constructorType))
+            if (context.InterfaceLookup.ContainsKey(constructorType))
             {
                 return context.InterfaceLookup[constructorType];
+            }
+
+            //if is unregistered interface we won't be resolving it
+            if (constructorType.IsInterface)
+            {
+                return null;
             }
 
             // we havent found type to use, so return initial
@@ -164,14 +170,14 @@ namespace EasyConstructor
             if (values != null)
             {
                 //naive implementation, seems sound tho
-
-                var props = values.GetType().GetProperties().Select(p => new NamedType(p.PropertyType, p.Name)).ToList();
+                var props = values.GetType().GetProperties();
                 int bestMatches = 0;
                 int bestParamCount = int.MaxValue;
                 foreach (var constructor in type.GetConstructors())
                 {
-                    var constructorParams = constructor.GetParameters().Select(p => new NamedType(p.ParameterType, p.Name));
-                    var matched = constructorParams.Count(param => props.Any(prop => prop.IsAssignableTo(param)));
+                    var constructorParams = constructor.GetParameters();
+                    //TODO look into interfaces etc
+                    var matched = constructorParams.Count(param => props.Any(prop => prop.IsUsableFor(param)));
 
                     if (matched > bestMatches || (matched == bestMatches && constructorParams.Count() < bestParamCount))
                     {

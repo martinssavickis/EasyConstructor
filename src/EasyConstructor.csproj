@@ -1,10 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net451</TargetFrameworks>
   </PropertyGroup>
-
-  <ItemGroup Condition=" '$(TargetFrameworkVersion)' == 'v4.5.1' ">
-    <PackageReference Include="System.ValueTuple" Version="4.4.0" />
-  </ItemGroup>
 </Project>
